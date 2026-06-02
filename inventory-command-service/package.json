@@ -1,0 +1,18 @@
+{
+  "name": "inventory-command-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "prisma db push && node src/server.js",
+    "dev": "node --watch src/server.js",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "amqplib": "^0.10.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "prisma": "^5.22.0"
+  }
+}

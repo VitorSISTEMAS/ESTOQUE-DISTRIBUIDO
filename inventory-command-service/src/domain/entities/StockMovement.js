@@ -1,0 +1,6 @@
+export const MOVEMENT_TYPES = {
+  IN: "IN",
+  SALE: "SALE",
+  TRANSFER_OUT: "TRANSFER_OUT",
+  TRANSFER_IN: "TRANSFER_IN"
+};
