@@ -7,37 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Branch {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  address   String?
+  createdAt DateTime @default(now())
+}
+
+model StockType {
+  id       Int                @id
+  name     String
+  products ProductReadModel[]
+}
+
 model ProductReadModel {
   id          String   @id
   name        String
   sku         String   @unique
   description String?
+  stockTypeId Int?
   createdAt   DateTime
+  stockType   StockType? @relation(fields: [stockTypeId], references: [id])
 }
 
 model StockReadModel {
-  id          String   @id @default(uuid())
-  productId   String
-  productName String
-  sku         String
-  branch      String
-  quantity    Int      @default(0)
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  productId     String
+  productName   String
+  sku           String
+  branch        String
+  quantity      Int      @default(0)
+  stockTypeId   Int?
+  stockTypeName String?
+  updatedAt     DateTime @updatedAt
 
   @@unique([productId, branch])
 }
 
 model MovementReadModel {
-  id           String   @id @default(uuid())
-  productId    String
-  productName  String
-  sku          String
-  type         String
-  branch       String?
-  sourceBranch String?
-  targetBranch String?
-  quantity     Int
-  createdAt    DateTime
+  id            String   @id @default(uuid())
+  productId     String
+  productName   String
+  sku           String
+  type          String
+  branch        String?
+  sourceBranch  String?
+  targetBranch  String?
+  quantity      Int
+  stockTypeId   Int?
+  stockTypeName String?
+  createdAt     DateTime
 }
 
 model ProcessedEvent {

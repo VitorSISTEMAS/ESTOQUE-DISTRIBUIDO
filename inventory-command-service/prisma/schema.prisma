@@ -7,13 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Branch {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StockType {
+  id       Int       @id
+  name     String
+  products Product[]
+}
+
 model Product {
   id          String          @id @default(uuid())
   name        String
   sku         String          @unique
   description String?
+  stockTypeId Int?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  stockType   StockType?      @relation(fields: [stockTypeId], references: [id])
   stocks      Stock[]
   movements   StockMovement[]
 }

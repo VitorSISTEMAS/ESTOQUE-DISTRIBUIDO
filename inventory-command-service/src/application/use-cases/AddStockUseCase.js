@@ -1,24 +1,27 @@
-import { randomUUID } from "node:crypto";
-import { Stock } from "../../domain/entities/Stock.js";
+import { randomUUID } from "node:crypto"
+import { Stock } from "../../domain/entities/Stock.js"
 
 export class AddStockUseCase {
-  constructor(productRepository, stockRepository, eventPublisher) {
-    this.productRepository = productRepository;
-    this.stockRepository = stockRepository;
-    this.eventPublisher = eventPublisher;
+  constructor(productRepository, branchRepository, stockRepository, eventPublisher) {
+    this.productRepository = productRepository
+    this.branchRepository = branchRepository
+    this.stockRepository = stockRepository
+    this.eventPublisher = eventPublisher
   }
 
   async execute(input) {
-    Stock.validateBranch(input.branch);
-    const quantity = Stock.validateQuantity(input.quantity);
-    const product = await this.productRepository.findById(input.productId);
-    if (!product) throw new Error("Produto nao encontrado.");
+    const branch = await this.branchRepository.findByName(input.branch)
+    if (!branch) throw new Error(`Filial "${input.branch}" nao encontrada.`)
+
+    const quantity = Stock.validateQuantity(input.quantity)
+    const product = await this.productRepository.findById(input.productId)
+    if (!product) throw new Error("Produto nao encontrado.")
 
     const result = await this.stockRepository.addStock({
       productId: input.productId,
       branch: input.branch,
       quantity
-    });
+    })
 
     await this.eventPublisher.publish("stock.added", {
       eventId: randomUUID(),
@@ -29,10 +32,11 @@ export class AddStockUseCase {
         productName: product.name,
         sku: product.sku,
         branch: input.branch,
-        quantity
+        quantity,
+        stockTypeId: product.stockTypeId
       }
-    });
+    })
 
-    return result;
+    return result
   }
 }

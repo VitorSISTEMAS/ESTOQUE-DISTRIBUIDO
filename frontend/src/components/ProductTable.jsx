@@ -1,4 +1,9 @@
-export function ProductTable({ products }) {
+export function ProductTable({ products, stockTypes }) {
+  function getStockTypeName(id) {
+    const st = stockTypes.find((t) => t.id === id)
+    return st ? st.name : "-"
+  }
+
   return (
     <section className="panel">
       <h2>Produtos</h2>
@@ -8,6 +13,7 @@ export function ProductTable({ products }) {
             <tr>
               <th>Nome</th>
               <th>SKU</th>
+              <th>Tipo Estoque</th>
               <th>Descricao</th>
             </tr>
           </thead>
@@ -16,6 +22,7 @@ export function ProductTable({ products }) {
               <tr key={product.id}>
                 <td>{product.name}</td>
                 <td>{product.sku}</td>
+                <td>{getStockTypeName(product.stockTypeId)}</td>
                 <td>{product.description || "-"}</td>
               </tr>
             ))}
@@ -23,5 +30,5 @@ export function ProductTable({ products }) {
         </table>
       </div>
     </section>
-  );
+  )
 }

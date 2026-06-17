@@ -1,4 +1,4 @@
-import { prisma } from "./prismaClient.js";
+import { prisma } from "./prismaClient.js"
 
 export class PrismaProductRepository {
   async create(product) {
@@ -6,12 +6,16 @@ export class PrismaProductRepository {
       data: {
         name: product.name,
         sku: product.sku,
-        description: product.description
+        description: product.description,
+        stockTypeId: product.stockTypeId
       }
-    });
+    })
   }
 
   async findById(id) {
-    return prisma.product.findUnique({ where: { id } });
+    return prisma.product.findUnique({
+      where: { id },
+      include: { stockType: true }
+    })
   }
 }

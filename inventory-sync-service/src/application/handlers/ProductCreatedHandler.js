@@ -1,9 +1,12 @@
+import { Product } from "../../domain/entities/Product.js"
+
 export class ProductCreatedHandler {
   constructor(readModelRepository) {
-    this.readModelRepository = readModelRepository;
+    this.readModelRepository = readModelRepository
   }
 
   async handle(event) {
-    await this.readModelRepository.applyProductCreated(event);
+    new Product(event.payload)
+    await this.readModelRepository.applyProductCreated(event)
   }
 }

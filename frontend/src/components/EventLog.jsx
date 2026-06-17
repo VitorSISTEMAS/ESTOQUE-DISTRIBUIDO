@@ -11,5 +11,5 @@ export function EventLog({ events }) {
         ))}
       </div>
     </section>
-  );
+  )
 }

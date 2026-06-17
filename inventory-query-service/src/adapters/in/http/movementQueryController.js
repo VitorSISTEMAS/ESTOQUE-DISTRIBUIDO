@@ -1,9 +1,15 @@
-import { container } from "../../../config/container.js";
+import { container } from "../../../config/container.js"
 
-export async function listMovements(_req, res, next) {
+export async function listMovements(req, res, next) {
   try {
-    res.json(await container.listMovementsUseCase.execute());
+    const { productName, stockTypeId, startDate, endDate } = req.query
+    const filters = {}
+    if (productName) filters.productName = productName
+    if (stockTypeId) filters.stockTypeId = stockTypeId
+    if (startDate) filters.startDate = startDate
+    if (endDate) filters.endDate = endDate
+    res.json(await container.listMovementsUseCase.execute(filters))
   } catch (error) {
-    next(error);
+    next(error)
   }
 }

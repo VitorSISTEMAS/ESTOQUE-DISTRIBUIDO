@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState } from "react"
 
 export function SaleForm({ branches, products, onSubmit }) {
-  const [form, setForm] = useState({ productId: "", branch: branches[0], quantity: 1 });
+  const [form, setForm] = useState({ productId: "", branch: branches[0], quantity: 1 })
 
   function update(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => ({ ...current, [field]: value }))
   }
 
   async function submit(event) {
-    event.preventDefault();
-    await onSubmit({ ...form, quantity: Number(form.quantity) });
+    event.preventDefault()
+    await onSubmit({ ...form, quantity: Number(form.quantity) })
   }
 
   return (
@@ -27,5 +27,5 @@ export function SaleForm({ branches, products, onSubmit }) {
       <input type="number" min="1" value={form.quantity} onChange={(event) => update("quantity", event.target.value)} />
       <button type="submit">Vender</button>
     </form>
-  );
+  )
 }
