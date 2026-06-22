@@ -33,7 +33,7 @@ export default function App() {
   const [events, setEvents] = useState([])
   const [branches, setBranches] = useState([])
   const [stockTypes, setStockTypes] = useState([])
-  const [notice, setNotice] = useState("Sistema pronto para demonstração.")
+  const [notice, setNotice] = useState("Sistema de Controle de Estoque Distribuído")
   const [loading, setLoading] = useState(false)
 
   const totalStock = useMemo(
