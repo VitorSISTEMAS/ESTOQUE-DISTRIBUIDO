@@ -42,7 +42,7 @@ export function TransferHistory({ stockTypes, products, branches }) {
       }
 
       if (transfers.length === 0) {
-        setError("Nenhuma transferencia encontrada com esses filtros.")
+        setError("Nenhuma transferência encontrada para os filtros aplicados.")
       } else {
         setResults(transfers)
       }
@@ -60,29 +60,31 @@ export function TransferHistory({ stockTypes, products, branches }) {
 
   return (
     <section className="panel">
-      <h2>Historico de Transferencias</h2>
-      <form className="form-grid" onSubmit={submit}>
-        <select value={form.productId} onChange={(event) => update("productId", event.target.value)}>
+      <div className="panel-header">
+        <div><span className="section-kicker">Auditoria</span><h2>Histórico de transferências</h2><p>Filtre as movimentações entre unidades por período e produto.</p></div>
+      </div>
+      <form className="form-grid history-filters" onSubmit={submit}>
+        <label>Produto<select value={form.productId} onChange={(event) => update("productId", event.target.value)}>
           <option value="">Todos os produtos</option>
           {products.map((p) => (
             <option key={p.id} value={p.id}>{p.name} - {p.sku}</option>
           ))}
-        </select>
-        <select value={form.stockTypeId} onChange={(event) => update("stockTypeId", event.target.value)}>
+        </select></label>
+        <label>Tipo de estoque<select value={form.stockTypeId} onChange={(event) => update("stockTypeId", event.target.value)}>
           <option value="">Todos os tipos de estoque</option>
           {stockTypes.map((st) => (
             <option key={st.id} value={st.id}>{st.id} - {st.name}</option>
           ))}
-        </select>
-        <select value={form.branch} onChange={(event) => update("branch", event.target.value)}>
+        </select></label>
+        <label>Filial<select value={form.branch} onChange={(event) => update("branch", event.target.value)}>
           <option value="">Todas as filiais</option>
           {branches.map((b) => (
             <option key={b.id} value={b.name}>{b.name}</option>
           ))}
-        </select>
-        <input type="date" value={form.startDate} onChange={(event) => update("startDate", event.target.value)} />
-        <input type="date" value={form.endDate} onChange={(event) => update("endDate", event.target.value)} />
-        <button type="submit" disabled={loading}>Consultar</button>
+        </select></label>
+        <label>Data inicial<input type="date" value={form.startDate} onChange={(event) => update("startDate", event.target.value)} /></label>
+        <label>Data final<input type="date" value={form.endDate} onChange={(event) => update("endDate", event.target.value)} /></label>
+        <button type="submit" disabled={loading}>{loading ? "Consultando..." : "Consultar histórico"}</button>
       </form>
 
       {error && <p className="error-msg">{error}</p>}
@@ -108,15 +110,15 @@ export function TransferHistory({ stockTypes, products, branches }) {
                 const info = rowInfo(m.type)
                 return (
                   <tr key={m.id} className={info.cls}>
-                    <td>{info.label}</td>
-                    <td>{m.productName}</td>
-                    <td>{m.sku}</td>
+                    <td><span className={`movement-badge ${info.cls}`}>{info.label}</span></td>
+                    <td><strong className="table-primary">{m.productName}</strong></td>
+                    <td><span className="sku">{m.sku}</span></td>
                     <td>{getStockTypeName(m.stockTypeId)}</td>
                     <td>{m.branch || "-"}</td>
                     <td>{m.sourceBranch || "-"}</td>
                     <td>{m.targetBranch || "-"}</td>
                     <td className="qty">{m.quantity}</td>
-                    <td>{new Date(m.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(m.createdAt).toLocaleString("pt-BR")}</td>
                   </tr>
                 )
               })}

@@ -15,10 +15,12 @@ export function BranchForm({ onSubmit }) {
 
   return (
     <form className="panel form-grid" onSubmit={submit}>
-      <h2>Cadastrar Filial</h2>
-      <input placeholder="Nome da filial" value={form.name} onChange={(event) => update("name", event.target.value)} required />
-      <input placeholder="Endereco" value={form.address} onChange={(event) => update("address", event.target.value)} />
-      <button type="submit">Cadastrar</button>
+      <div className="panel-header">
+        <div><span className="section-kicker">Nova unidade</span><h2>Cadastrar filial</h2><p>Adicione uma unidade à rede de estoque.</p></div>
+      </div>
+      <label>Nome da filial<input placeholder="Ex.: Centro - Porto Alegre" value={form.name} onChange={(event) => update("name", event.target.value)} required /></label>
+      <label>Endereço<input placeholder="Rua, número e cidade" value={form.address} onChange={(event) => update("address", event.target.value)} /></label>
+      <button type="submit">Cadastrar filial</button>
     </form>
   )
 }

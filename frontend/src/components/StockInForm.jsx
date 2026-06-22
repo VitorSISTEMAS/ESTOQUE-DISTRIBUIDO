@@ -9,23 +9,24 @@ export function StockInForm({ branches, products, onSubmit }) {
 
   async function submit(event) {
     event.preventDefault()
-    await onSubmit({ ...form, quantity: Number(form.quantity) })
+    await onSubmit({ ...form, branch: form.branch || branches[0], quantity: Number(form.quantity) })
   }
 
   return (
     <form className="panel form-grid" onSubmit={submit}>
-      <h2>Entrada de Estoque</h2>
-      <select value={form.productId} onChange={(event) => update("productId", event.target.value)} required>
+      <div className="panel-header"><div><span className="section-kicker">Abastecimento</span><h2>Entrada de estoque</h2><p>Adicione unidades em uma filial.</p></div></div>
+      <label>Produto<select value={form.productId} onChange={(event) => update("productId", event.target.value)} required>
         <option value="">Produto</option>
         {products.map((product) => (
           <option key={product.id} value={product.id}>{product.name} - {product.sku}</option>
         ))}
-      </select>
-      <select value={form.branch} onChange={(event) => update("branch", event.target.value)}>
+      </select></label>
+      <label>Filial<select value={form.branch || branches[0] || ""} onChange={(event) => update("branch", event.target.value)} required>
+        {branches.length === 0 && <option value="">Aguardando filiais</option>}
         {branches.map((branch) => <option key={branch}>{branch}</option>)}
-      </select>
-      <input type="number" min="1" value={form.quantity} onChange={(event) => update("quantity", event.target.value)} />
-      <button type="submit">Adicionar</button>
+      </select></label>
+      <label>Quantidade<input type="number" min="1" value={form.quantity} onChange={(event) => update("quantity", event.target.value)} /></label>
+      <button type="submit">Adicionar ao estoque</button>
     </form>
   )
 }

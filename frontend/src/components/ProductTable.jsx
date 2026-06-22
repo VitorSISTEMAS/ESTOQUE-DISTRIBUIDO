@@ -6,7 +6,10 @@ export function ProductTable({ products, stockTypes }) {
 
   return (
     <section className="panel">
-      <h2>Produtos</h2>
+      <div className="panel-header">
+        <div><span className="section-kicker">Catálogo</span><h2>Produtos cadastrados</h2><p>Itens disponíveis para movimentação entre filiais.</p></div>
+        <span className="record-count">{products.length} produtos</span>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -14,18 +17,19 @@ export function ProductTable({ products, stockTypes }) {
               <th>Nome</th>
               <th>SKU</th>
               <th>Tipo Estoque</th>
-              <th>Descricao</th>
+              <th>Descrição</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
               <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.sku}</td>
-                <td>{getStockTypeName(product.stockTypeId)}</td>
+                <td><strong className="table-primary">{product.name}</strong></td>
+                <td><span className="sku">{product.sku}</span></td>
+                <td><span className="status-badge status-badge--neutral">{getStockTypeName(product.stockTypeId)}</span></td>
                 <td>{product.description || "-"}</td>
               </tr>
             ))}
+            {products.length === 0 && <tr><td colSpan="4"><div className="empty-state">Nenhum produto cadastrado até o momento.</div></td></tr>}
           </tbody>
         </table>
       </div>

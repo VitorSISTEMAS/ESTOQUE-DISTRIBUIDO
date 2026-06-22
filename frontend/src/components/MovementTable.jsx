@@ -11,11 +11,11 @@ export function MovementTable({ movements }) {
     return ["Todas", ...[...set].sort()]
   }, [movements])
 
-  const [selected, setSelected] = useState("Taquara")
+  const [selected, setSelected] = useState("Todas")
 
   const filtered = useMemo(() => {
     if (selected === "Todas") return movements
-    return movements.filter((m) => m.branch === selected)
+    return movements.filter((m) => m.branch === selected || m.sourceBranch === selected || m.targetBranch === selected)
   }, [movements, selected])
 
   function rowInfo(type) {
@@ -26,12 +26,12 @@ export function MovementTable({ movements }) {
 
   return (
     <section className="panel">
-      <h2>Movimentacoes</h2>
-      <select value={selected} onChange={(e) => setSelected(e.target.value)} className="branch-filter">
-        {branches.map((b) => (
-          <option key={b} value={b}>{b}</option>
-        ))}
-      </select>
+      <div className="panel-header">
+        <div><span className="section-kicker">Rastreabilidade</span><h2>Movimentações</h2><p>Entradas, saídas e transferências registradas.</p></div>
+        <label className="filter-control">Filial<select value={selected} onChange={(e) => setSelected(e.target.value)} className="branch-filter">
+          {branches.map((b) => <option key={b} value={b}>{b}</option>)}
+        </select></label>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -50,9 +50,9 @@ export function MovementTable({ movements }) {
               const info = rowInfo(movement.type)
               return (
                 <tr key={movement.id} className={info.cls}>
-                  <td>{info.label}</td>
-                  <td>{movement.productName}</td>
-                  <td>{movement.sku}</td>
+                  <td><span className={`movement-badge ${info.cls}`}>{info.label}</span></td>
+                  <td><strong className="table-primary">{movement.productName}</strong></td>
+                  <td><span className="sku">{movement.sku}</span></td>
                   <td>{movement.branch || "-"}</td>
                   <td>{movement.sourceBranch || "-"}</td>
                   <td>{movement.targetBranch || "-"}</td>
@@ -60,6 +60,7 @@ export function MovementTable({ movements }) {
                 </tr>
               )
             })}
+            {filtered.length === 0 && <tr><td colSpan="7"><div className="empty-state">Nenhuma movimentação encontrada para este filtro.</div></td></tr>}
           </tbody>
         </table>
       </div>

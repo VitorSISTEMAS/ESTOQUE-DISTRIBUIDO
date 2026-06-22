@@ -14,7 +14,7 @@ export function StockQuery({ stockTypes }) {
   async function submit(event) {
     event.preventDefault()
     if (!form.productName.trim()) {
-      setError("Nome do produto e obrigatorio.")
+      setError("O nome do produto é obrigatório.")
       return
     }
 
@@ -32,7 +32,7 @@ export function StockQuery({ stockTypes }) {
       if (data.length === 0) {
         if (form.stockTypeId) {
           const st = stockTypes.find((t) => t.id === Number(form.stockTypeId))
-          setError(`Produto nao encontrado no tipo de estoque ${st ? st.name : "selecionado"}.`)
+          setError(`Produto não encontrado no tipo de estoque ${st ? st.name : "selecionado"}.`)
         } else {
           setError("Nenhum produto encontrado com esse nome.")
         }
@@ -53,21 +53,23 @@ export function StockQuery({ stockTypes }) {
 
   return (
     <section className="panel">
-      <h2>Consultar Estoque</h2>
-      <form className="form-grid" onSubmit={submit}>
-        <input
-          placeholder="Nome do produto (obrigatorio)"
+      <div className="panel-header">
+        <div><span className="section-kicker">Pesquisa operacional</span><h2>Consultar estoque</h2><p>Localize produtos e confira a disponibilidade nas filiais.</p></div>
+      </div>
+      <form className="form-grid form-grid--inline" onSubmit={submit}>
+        <label>Nome do produto<input
+          placeholder="Digite o nome do produto"
           value={form.productName}
           onChange={(event) => update("productName", event.target.value)}
           required
-        />
-        <select value={form.stockTypeId} onChange={(event) => update("stockTypeId", event.target.value)}>
+        /></label>
+        <label>Tipo de estoque<select value={form.stockTypeId} onChange={(event) => update("stockTypeId", event.target.value)}>
           <option value="">Todos os tipos de estoque</option>
           {stockTypes.map((st) => (
             <option key={st.id} value={st.id}>{st.id} - {st.name}</option>
           ))}
-        </select>
-        <button type="submit" disabled={loading}>Consultar</button>
+        </select></label>
+        <button type="submit" disabled={loading}>{loading ? "Consultando..." : "Consultar estoque"}</button>
       </form>
 
       {error && <p className="error-msg">{error}</p>}
@@ -88,8 +90,8 @@ export function StockQuery({ stockTypes }) {
               {results.map((item) => (
                 <tr key={item.id}>
                   <td>{item.branch}</td>
-                  <td>{item.productName}</td>
-                  <td>{item.sku}</td>
+                  <td><strong className="table-primary">{item.productName}</strong></td>
+                  <td><span className="sku">{item.sku}</span></td>
                   <td>{item.stockTypeName || getStockTypeName(item.stockTypeId)}</td>
                   <td className="qty">{item.quantity}</td>
                 </tr>

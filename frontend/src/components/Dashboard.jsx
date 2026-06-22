@@ -2,142 +2,152 @@ import { useMemo } from "react"
 
 const ICONS = {
   products: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
-  stock: "M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z",
-  branches: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z",
+  branches: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5",
+  warning: "M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z",
   events: "M13 10V3L4 14h7v7l9-11h-7z",
 }
 
+function stockStatus(quantity) {
+  if (quantity <= 0) return { label: "Sem estoque", className: "danger" }
+  if (quantity <= 5) return { label: "Baixo estoque", className: "warning" }
+  return { label: "Estoque normal", className: "success" }
+}
+
 export function Dashboard({ products, stock, movements, events, branches }) {
-  const totalStock = useMemo(
-    () => stock.reduce((sum, item) => sum + item.quantity, 0),
-    [stock]
-  )
-
-  const stockByBranch = useMemo(() => {
-    const map = {}
-    for (const item of stock) {
-      map[item.branch] = (map[item.branch] || 0) + item.quantity
-    }
-    return Object.entries(map).sort((a, b) => b[1] - a[1])
-  }, [stock])
-
-  const maxStock = stockByBranch.length > 0 ? stockByBranch[0][1] : 1
-
-  const recentMovements = movements.slice(-8).reverse()
-
-  const recentEvents = events.slice(-6).reverse()
-
-  const stockByProduct = useMemo(() => {
-    const map = {}
-    for (const item of stock) {
-      map[item.productName] = (map[item.productName] || 0) + item.quantity
-    }
-    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 6)
-  }, [stock])
-
-  const maxProduct = stockByProduct.length > 0 ? stockByProduct[0][1] : 1
+  const totalStock = useMemo(() => stock.reduce((sum, item) => sum + item.quantity, 0), [stock])
+  const lowStock = useMemo(() => stock.filter((item) => item.quantity <= 5).length, [stock])
+  const recentMovements = movements.slice(-5).reverse()
+  const recentEvents = events.slice(-5).reverse()
+  const stockPreview = [...stock].sort((a, b) => a.quantity - b.quantity).slice(0, 6)
 
   const cards = [
-    { key: "products", label: "Produtos", value: products.length, color: "#059669" },
-    { key: "stock", label: "Itens em Estoque", value: totalStock, color: "#0284c7" },
-    { key: "branches", label: "Filiais", value: branches.length, color: "#d97706" },
-    { key: "events", label: "Eventos", value: events.length, color: "#7c3aed" },
+    { key: "products", label: "Total de produtos", value: products.length, detail: `${totalStock} unidades disponíveis`, tone: "blue" },
+    { key: "branches", label: "Filiais cadastradas", value: branches.length, detail: "Unidades participantes", tone: "indigo" },
+    { key: "warning", label: "Itens em atenção", value: lowStock, detail: "Com até 5 unidades", tone: "amber" },
+    { key: "events", label: "Eventos processados", value: events.length, detail: `${movements.length} movimentações`, tone: "green" },
   ]
 
   return (
     <div className="dashboard">
       <div className="stats-row">
         {cards.map((card) => (
-          <div key={card.key} className="stat-card" style={{ borderTopColor: card.color }}>
-            <div className="stat-card__icon" style={{ color: card.color }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d={ICONS[card.key]} />
-              </svg>
+          <article key={card.key} className={`stat-card stat-card--${card.tone}`}>
+            <div className="stat-card__head">
+              <div className="stat-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d={ICONS[card.key]} />
+                </svg>
+              </div>
+              <span className="stat-trend">Atual</span>
             </div>
-            <div className="stat-card__info">
-              <span className="stat-card__value">{card.value}</span>
-              <span className="stat-card__label">{card.label}</span>
-            </div>
-          </div>
+            <strong className="stat-card__value">{card.value}</strong>
+            <span className="stat-card__label">{card.label}</span>
+            <span className="stat-card__detail">{card.detail}</span>
+          </article>
         ))}
       </div>
 
-      <div className="dashboard-grid">
-        <div className="panel">
-          <h2>Estoque por Filial</h2>
-          <div className="stock-bars">
-            {stockByBranch.length === 0 ? (
-              <p className="empty-msg">Nenhum estoque registrado</p>
-            ) : (
-              stockByBranch.map(([branch, qty]) => (
-                <div key={branch} className="bar-row">
-                  <span className="bar-label">{branch}</span>
-                  <div className="bar-track">
-                    <div className="bar-fill" style={{ width: `${(qty / maxStock) * 100}%` }} />
-                  </div>
-                  <span className="bar-value">{qty}</span>
-                </div>
-              ))
-            )}
+      <div className="dashboard-primary">
+        <section className="panel panel--wide">
+          <div className="panel-header">
+            <div>
+              <span className="section-kicker">Disponibilidade</span>
+              <h2>Visão geral do estoque</h2>
+              <p>Produtos que exigem atenção aparecem primeiro.</p>
+            </div>
+            <span className="record-count">{stock.length} registros</span>
           </div>
-        </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Produto</th><th>SKU</th><th>Filial</th><th>Quantidade</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {stockPreview.map((item) => {
+                  const status = stockStatus(item.quantity)
+                  return (
+                    <tr key={item.id}>
+                      <td><strong className="table-primary">{item.productName}</strong></td>
+                      <td><span className="sku">{item.sku}</span></td>
+                      <td>{item.branch}</td>
+                      <td className="qty">{item.quantity}</td>
+                      <td><span className={`status-badge status-badge--${status.className}`}>{status.label}</span></td>
+                    </tr>
+                  )
+                })}
+                {stockPreview.length === 0 && (
+                  <tr><td colSpan="5"><div className="empty-state">Nenhum estoque registrado até o momento.</div></td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-        <div className="panel">
-          <h2>Movimentações Recentes</h2>
-          {recentMovements.length === 0 ? (
-            <p className="empty-msg">Nenhuma movimentação</p>
-          ) : (
-            <div className="movement-list">
-              {recentMovements.map((m) => (
-                <div key={m.id} className="movement-item">
-                  <div className={`movement-type movement-type--${m.type === "TRANSFER_IN" ? "in" : m.type === "TRANSFER_OUT" ? "out" : "other"}`}>
-                    {m.type === "TRANSFER_IN" ? "↓" : m.type === "TRANSFER_OUT" ? "↑" : "•"}
-                  </div>
-                  <div className="movement-info">
-                    <strong>{m.productName}</strong>
-                    <span>{m.branch || m.sourceBranch}{m.targetBranch ? ` → ${m.targetBranch}` : ""}</span>
-                  </div>
-                  <span className="movement-qty">{m.quantity}</span>
-                </div>
-              ))}
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <span className="section-kicker">Atividade</span>
+              <h2>Movimentações recentes</h2>
+              <p>Últimas alterações no estoque.</p>
             </div>
-          )}
-        </div>
+          </div>
+          <div className="activity-list">
+            {recentMovements.map((movement) => (
+              <div className="activity-item" key={movement.id}>
+                <span className={`activity-icon activity-icon--${movement.type === "TRANSFER_IN" ? "in" : movement.type === "TRANSFER_OUT" ? "out" : "neutral"}`}>
+                  {movement.type === "TRANSFER_IN" ? "↓" : movement.type === "TRANSFER_OUT" ? "↑" : "•"}
+                </span>
+                <div>
+                  <strong>{movement.productName}</strong>
+                  <span>{movement.branch || movement.sourceBranch || "Filial não informada"}</span>
+                </div>
+                <b>{movement.quantity}</b>
+              </div>
+            ))}
+            {recentMovements.length === 0 && <div className="empty-state">Nenhuma movimentação registrada.</div>}
+          </div>
+        </section>
+      </div>
 
-        <div className="panel">
-          <h2>Eventos Recentes</h2>
-          {recentEvents.length === 0 ? (
-            <p className="empty-msg">Nenhum evento</p>
-          ) : (
-            <div className="event-list">
-              {recentEvents.map((e) => (
-                <div key={e.id} className="event-chip">
-                  <span className="event-chip__type">{e.eventType}</span>
-                  <span className="event-chip__id">{e.eventId?.slice(0, 8)}</span>
-                </div>
-              ))}
+      <div className="dashboard-secondary">
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <span className="section-kicker">Integração</span>
+              <h2>Fluxo de processamento</h2>
+              <p>Visão simplificada da consistência eventual.</p>
             </div>
-          )}
-        </div>
+          </div>
+          <div className="service-flow">
+            {["Command Service", "RabbitMQ", "Sync Service", "Query Service"].map((service, index) => (
+              <div className="flow-step" key={service}>
+                <span>{index + 1}</span>
+                <strong>{service}</strong>
+                {index < 3 && <b>→</b>}
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <div className="panel">
-          <h2>Distribuição por Produto</h2>
-          {stockByProduct.length === 0 ? (
-            <p className="empty-msg">Nenhum estoque registrado</p>
-          ) : (
-            <div className="stock-bars">
-              {stockByProduct.map(([name, qty]) => (
-                <div key={name} className="bar-row">
-                  <span className="bar-label">{name}</span>
-                  <div className="bar-track">
-                    <div className="bar-fill bar-fill--alt" style={{ width: `${(qty / maxProduct) * 100}%` }} />
-                  </div>
-                  <span className="bar-value">{qty}</span>
-                </div>
-              ))}
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <span className="section-kicker">Eventos</span>
+              <h2>Últimos eventos processados</h2>
+              <p>Mensagens recebidas pelo modelo de leitura.</p>
             </div>
-          )}
-        </div>
+          </div>
+          <div className="event-list">
+            {recentEvents.map((event) => (
+              <div className="event-row" key={event.id}>
+                <span className="event-badge">{event.eventType}</span>
+                <code>{event.eventId?.slice(0, 8) || "—"}</code>
+                <span className="status-badge status-badge--success">Processado</span>
+              </div>
+            ))}
+            {recentEvents.length === 0 && <div className="empty-state">Nenhum evento processado até o momento.</div>}
+          </div>
+        </section>
       </div>
     </div>
   )
