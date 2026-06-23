@@ -1,21 +1,17 @@
 import { Router } from "express"
-import { createProduct } from "./adapters/in/http/productController.js"
-import { addStock } from "./adapters/in/http/stockController.js"
-import { registerSale } from "./adapters/in/http/saleController.js"
-import { transferStock } from "./adapters/in/http/transferController.js"
-import { createBranch, listBranches } from "./adapters/in/http/branchController.js"
-import { listStockTypes } from "./adapters/in/http/stockTypeController.js"
+import { container } from "./config/container.js"
+import { createProductController } from "./adapters/in/http/productController.js"
+import { addStockController } from "./adapters/in/http/stockController.js"
+import { registerSaleController } from "./adapters/in/http/saleController.js"
+import { transferStockController } from "./adapters/in/http/transferController.js"
+import { createBranchController, listBranchesController } from "./adapters/in/http/branchController.js"
 
 export const routes = Router()
 
-routes.get("/health", (_req, res) => {
-  res.json({ service: "inventory-command-service", status: "ok" })
-})
-
-routes.post("/products", createProduct)
-routes.post("/stock/in", addStock)
-routes.post("/sales", registerSale)
-routes.post("/transfers", transferStock)
-routes.post("/branches", createBranch)
-routes.get("/branches", listBranches)
-routes.get("/stock-types", listStockTypes)
+routes.get("/health", (_req, res) => res.json({ service: "inventory-command-service", status: "ok" }))
+routes.post("/products", createProductController(container.createProductUseCase))
+routes.post("/stock/in", addStockController(container.addStockUseCase))
+routes.post("/sales", registerSaleController(container.registerSaleUseCase))
+routes.post("/transfers", transferStockController(container.transferStockUseCase))
+routes.post("/branches", createBranchController(container.createBranchUseCase))
+routes.get("/branches", listBranchesController(container.listBranchesUseCase))

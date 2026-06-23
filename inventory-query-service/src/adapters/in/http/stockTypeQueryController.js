@@ -1,9 +1,9 @@
-import { container } from "../../../config/container.js"
-
-export async function listStockTypes(_req, res, next) {
-  try {
-    res.json(await container.listStockTypesUseCase.execute())
-  } catch (error) {
-    next(error)
+export function listStockTypesController(listStockTypesUseCase) {
+  return async function (_req, res, next) {
+    try {
+      res.json(await listStockTypesUseCase.execute())
+    } catch (error) {
+      next(error)
+    }
   }
 }

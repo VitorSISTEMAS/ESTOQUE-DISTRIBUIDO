@@ -1,3 +1,5 @@
+import { MOVEMENT_TYPES } from "../../../domain/entities/StockMovement.js"
+import { ProcessedEvent } from "../../../domain/entities/ProcessedEvent.js"
 import { prisma } from "./prismaClient.js"
 
 export class PrismaReadModelRepository {
@@ -28,7 +30,7 @@ export class PrismaReadModelRepository {
 
       await tx.movementReadModel.create({
         data: this.buildMovement(event, {
-          type: "CREATE",
+          type: MOVEMENT_TYPES.CREATE,
           quantity: 0
         })
       })
@@ -44,7 +46,7 @@ export class PrismaReadModelRepository {
       await this.incrementStock(tx, payload, payload.branch, payload.quantity)
       await tx.movementReadModel.create({
         data: this.buildMovement(event, {
-          type: "IN",
+          type: MOVEMENT_TYPES.IN,
           branch: payload.branch,
           quantity: payload.quantity
         })
@@ -60,7 +62,7 @@ export class PrismaReadModelRepository {
       await this.incrementStock(tx, payload, payload.branch, -payload.quantity)
       await tx.movementReadModel.create({
         data: this.buildMovement(event, {
-          type: "SALE",
+          type: MOVEMENT_TYPES.SALE,
           branch: payload.branch,
           quantity: payload.quantity
         })
@@ -77,7 +79,7 @@ export class PrismaReadModelRepository {
       await this.incrementStock(tx, payload, payload.targetBranch, payload.quantity)
       await tx.movementReadModel.create({
         data: this.buildMovement(event, {
-          type: "TRANSFER_OUT",
+          type: MOVEMENT_TYPES.TRANSFER_OUT,
           branch: payload.sourceBranch,
           sourceBranch: payload.sourceBranch,
           targetBranch: payload.targetBranch,
@@ -86,7 +88,7 @@ export class PrismaReadModelRepository {
       })
       await tx.movementReadModel.create({
         data: this.buildMovement(event, {
-          type: "TRANSFER_IN",
+          type: MOVEMENT_TYPES.TRANSFER_IN,
           branch: payload.targetBranch,
           sourceBranch: payload.sourceBranch,
           targetBranch: payload.targetBranch,
@@ -176,6 +178,12 @@ export class PrismaReadModelRepository {
   }
 
   async recordProcessed(tx, event) {
+    new ProcessedEvent({
+      eventId: event.eventId,
+      eventType: event.eventType,
+      payload: event.payload
+    })
+
     await tx.processedEvent.create({
       data: {
         eventId: event.eventId,

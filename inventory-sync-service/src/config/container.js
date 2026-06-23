@@ -1,11 +1,11 @@
-import { ProductCreatedHandler } from "../application/handlers/ProductCreatedHandler.js";
-import { SaleCompletedHandler } from "../application/handlers/SaleCompletedHandler.js";
-import { StockAddedHandler } from "../application/handlers/StockAddedHandler.js";
-import { StockTransferredHandler } from "../application/handlers/StockTransferredHandler.js";
-import { BranchCreatedHandler } from "../application/handlers/BranchCreatedHandler.js";
-import { PrismaReadModelRepository } from "../adapters/out/database/prismaReadModelRepository.js";
+import { ProductCreatedHandler } from "../application/handlers/ProductCreatedHandler.js"
+import { SaleCompletedHandler } from "../application/handlers/SaleCompletedHandler.js"
+import { StockAddedHandler } from "../application/handlers/StockAddedHandler.js"
+import { StockTransferredHandler } from "../application/handlers/StockTransferredHandler.js"
+import { BranchCreatedHandler } from "../application/handlers/BranchCreatedHandler.js"
+import { PrismaReadModelRepository } from "../adapters/out/database/prismaReadModelRepository.js"
 
-const readModelRepository = new PrismaReadModelRepository();
+const readModelRepository = new PrismaReadModelRepository()
 
 export const container = {
   readModelRepository,
@@ -16,4 +16,4 @@ export const container = {
     STOCK_TRANSFERRED: new StockTransferredHandler(readModelRepository),
     BRANCH_CREATED: new BranchCreatedHandler(readModelRepository)
   }
-};
+}

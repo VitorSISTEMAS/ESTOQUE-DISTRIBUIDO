@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "dotenv/config"
 
 export const env = {
   port: Number(process.env.PORT || 3003),
@@ -7,4 +7,4 @@ export const env = {
   rabbitmqExchange: process.env.RABBITMQ_EXCHANGE || "inventory.events",
   rabbitmqQueue: process.env.RABBITMQ_QUEUE || "inventory.sync.queue",
   syncDelayMs: Number(process.env.SYNC_DELAY_MS || 700)
-};
+}
