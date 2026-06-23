@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { queryApi } from "../api/queryApi.js"
+import { ProductSelect } from "./ProductSelect.jsx"
 
 export function TransferHistory({ stockTypes, products, branches }) {
   const [form, setForm] = useState({ productId: "", stockTypeId: "", branch: "", startDate: "", endDate: "" })
@@ -64,12 +65,7 @@ export function TransferHistory({ stockTypes, products, branches }) {
         <div><span className="section-kicker">Auditoria</span><h2>Histórico de transferências</h2><p>Filtre as movimentações entre unidades por período e produto.</p></div>
       </div>
       <form className="form-grid history-filters" onSubmit={submit}>
-        <label>Produto<select value={form.productId} onChange={(event) => update("productId", event.target.value)}>
-          <option value="">Todos os produtos</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>{p.name} - {p.sku}</option>
-          ))}
-        </select></label>
+        <label>Produto<ProductSelect products={products} value={form.productId} onChange={(v) => update("productId", v)} placeholder="Todos os produtos" /></label>
         <label>Tipo de estoque<select value={form.stockTypeId} onChange={(event) => update("stockTypeId", event.target.value)}>
           <option value="">Todos os tipos de estoque</option>
           {stockTypes.map((st) => (
