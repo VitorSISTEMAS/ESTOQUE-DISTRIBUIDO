@@ -59,8 +59,9 @@ app.get("/metrics", async (_req: Request, res: Response) => {
   res.end(await register.metrics())
 })
 
-app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
-  res.status(400).json({ message: error.message })
+app.use((error: Error & { statusCode?: number }, _req: Request, res: Response, _next: NextFunction) => {
+  const status = error.statusCode || 400
+  res.status(status).json({ message: error.message })
 })
 
 seed().then(() => {

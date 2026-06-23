@@ -10,9 +10,9 @@ export class GetStockByBranchUseCase {
   }
 
   async execute(branch: string): Promise<StockReadModel[]> {
-    try {
-      StockReadModel.validateBranch(branch)
-    } catch {
+    const branches = await this.readRepository.listBranches()
+    const exists = branches.some(b => b.name === branch)
+    if (!exists) {
       throw new NotFoundError("Branch", branch)
     }
 
