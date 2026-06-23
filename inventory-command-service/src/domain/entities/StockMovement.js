@@ -1,7 +1,0 @@
-export const MOVEMENT_TYPES = {
-  CREATE: "CREATE",
-  IN: "IN",
-  SALE: "SALE",
-  TRANSFER_OUT: "TRANSFER_OUT",
-  TRANSFER_IN: "TRANSFER_IN"
-}

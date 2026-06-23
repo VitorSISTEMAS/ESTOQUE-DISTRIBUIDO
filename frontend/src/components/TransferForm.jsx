@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { ProductSelect } from "./ProductSelect.jsx"
 
 export function TransferForm({ branches, products, onSubmit }) {
   const [form, setForm] = useState({
@@ -25,12 +26,7 @@ export function TransferForm({ branches, products, onSubmit }) {
   return (
     <form className="panel form-grid" onSubmit={submit}>
       <div className="panel-header"><div><span className="section-kicker">Movimentação</span><h2>Transferir estoque</h2><p>Defina a origem, o destino e a quantidade.</p></div></div>
-      <label>Produto<select value={form.productId} onChange={(event) => update("productId", event.target.value)} required>
-        <option value="">Produto</option>
-        {products.map((product) => (
-          <option key={product.id} value={product.id}>{product.name} - {product.sku}</option>
-        ))}
-      </select></label>
+      <label>Produto<ProductSelect products={products} value={form.productId} onChange={(v) => update("productId", v)} required /></label>
       <label>Filial de origem<select value={form.sourceBranch || branches[0] || ""} onChange={(event) => update("sourceBranch", event.target.value)} required>
         {branches.length === 0 && <option value="">Aguardando filiais</option>}
         {branches.map((branch) => <option key={branch}>{branch}</option>)}

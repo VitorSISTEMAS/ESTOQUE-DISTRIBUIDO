@@ -1,0 +1,76 @@
+{
+  "title": "Inventory - Visão Geral",
+  "uid": "inventory-overview",
+  "version": 1,
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Requisições por segundo",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{job}} - {{method}} {{route}}"
+        }
+      ]
+    },
+    {
+      "title": "Latência P95 (segundos)",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m]))",
+          "legendFormat": "{{job}} - {{method}} {{route}}"
+        }
+      ]
+    },
+    {
+      "title": "Códigos de Status HTTP",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status_code=~\"2..\"}[1m])",
+          "legendFormat": "2xx - {{job}}"
+        },
+        {
+          "expr": "rate(http_requests_total{status_code=~\"4..\"}[1m])",
+          "legendFormat": "4xx - {{job}}"
+        },
+        {
+          "expr": "rate(http_requests_total{status_code=~\"5..\"}[1m])",
+          "legendFormat": "5xx - {{job}}"
+        }
+      ]
+    },
+    {
+      "title": "Health Check - UP",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "{{job}}"
+        }
+      ]
+    },
+    {
+      "title": "Taxa de falha (5xx / total)",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status_code=~\"5..\"}[1m]) / rate(http_requests_total[1m]) * 100",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "yaxes": [
+        { "format": "percent", "max": 100, "min": 0, "decimals": 2, "label": "%" },
+        { "show": false }
+      ]
+    }
+  ],
+  "schemaVersion": 39
+}
