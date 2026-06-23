@@ -1,10 +1,11 @@
 import { Router } from "express"
-import { listEvents } from "./adapters/in/http/eventQueryController.js"
-import { listMovements } from "./adapters/in/http/movementQueryController.js"
-import { listProducts } from "./adapters/in/http/productQueryController.js"
-import { listStock, listStockByBranch } from "./adapters/in/http/stockQueryController.js"
-import { listBranches } from "./adapters/in/http/branchQueryController.js"
-import { listStockTypes } from "./adapters/in/http/stockTypeQueryController.js"
+import { container } from "./config/container.js"
+import { listProductsController } from "./adapters/in/http/productQueryController.js"
+import { listStockController, listStockByBranchController } from "./adapters/in/http/stockQueryController.js"
+import { listMovementsController } from "./adapters/in/http/movementQueryController.js"
+import { listEventsController } from "./adapters/in/http/eventQueryController.js"
+import { listBranchesController } from "./adapters/in/http/branchQueryController.js"
+import { listStockTypesController } from "./adapters/in/http/stockTypeQueryController.js"
 
 export const routes = Router()
 
@@ -12,10 +13,10 @@ routes.get("/health", (_req, res) => {
   res.json({ service: "inventory-query-service", status: "ok" })
 })
 
-routes.get("/products", listProducts)
-routes.get("/stock", listStock)
-routes.get("/stock/:branch", listStockByBranch)
-routes.get("/movements", listMovements)
-routes.get("/events", listEvents)
-routes.get("/branches", listBranches)
-routes.get("/stock-types", listStockTypes)
+routes.get("/products", listProductsController(container.listProductsUseCase))
+routes.get("/stock", listStockController(container.getStockUseCase))
+routes.get("/stock/:branch", listStockByBranchController(container.getStockByBranchUseCase))
+routes.get("/movements", listMovementsController(container.listMovementsUseCase))
+routes.get("/events", listEventsController(container.listEventsUseCase))
+routes.get("/branches", listBranchesController(container.listBranchesUseCase))
+routes.get("/stock-types", listStockTypesController(container.listStockTypesUseCase))

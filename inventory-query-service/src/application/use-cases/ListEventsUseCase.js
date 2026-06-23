@@ -1,9 +1,9 @@
 export class ListEventsUseCase {
   constructor(readRepository) {
-    this.readRepository = readRepository;
+    this.readRepository = readRepository
   }
 
   async execute() {
-    return this.readRepository.listEvents();
+    return this.readRepository.listEvents()
   }
 }
