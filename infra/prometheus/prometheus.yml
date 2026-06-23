@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "inventory-command-service"
+    static_configs:
+      - targets: ["inventory-command-service:3001"]
+
+  - job_name: "inventory-query-service"
+    static_configs:
+      - targets: ["inventory-query-service:3002"]
+
+  - job_name: "inventory-sync-service"
+    static_configs:
+      - targets: ["inventory-sync-service:3003"]
