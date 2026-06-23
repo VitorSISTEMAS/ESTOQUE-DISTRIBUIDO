@@ -48,12 +48,27 @@
     {
       "title": "Health Check - UP",
       "type": "stat",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
       "targets": [
         {
           "expr": "up",
           "legendFormat": "{{job}}"
         }
+      ]
+    },
+    {
+      "title": "Taxa de falha (5xx / total)",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status_code=~\"5..\"}[1m]) / rate(http_requests_total[1m]) * 100",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "yaxes": [
+        { "format": "percent", "max": 100, "min": 0, "decimals": 2, "label": "%" },
+        { "show": false }
       ]
     }
   ],

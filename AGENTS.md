@@ -137,8 +137,14 @@ histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[1m]))
 # Erros 5xx por serviço
 rate(http_requests_total{status_code=~"5.."}[1m])
 
+# Taxa de falha (% de 5xx sobre o total)
+rate(http_requests_total{status_code=~"5.."}[1m]) / rate(http_requests_total[1m]) * 100
+
 # Top rotas mais lentas
 topk(5, avg by (route) (http_request_duration_seconds_sum / http_request_duration_seconds_count))
+
+# Contagem absoluta de erros 5xx nas últimas 5min
+increase(http_requests_total{status_code=~"5.."}[5m])
 ```
 
 ### Convenções de Código
