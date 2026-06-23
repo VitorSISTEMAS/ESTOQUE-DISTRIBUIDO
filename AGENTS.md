@@ -86,6 +86,7 @@ cd frontend && npm run dev
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin)
 
+
 ### Monitoria (Prometheus + Grafana)
 
 **Arquitetura:**
