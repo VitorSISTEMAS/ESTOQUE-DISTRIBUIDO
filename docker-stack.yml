@@ -1,0 +1,237 @@
+version: "3.8"
+
+services:
+  postgres-write:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: inventory_write_db
+    volumes:
+      - postgres_write_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints: [node.role == manager]
+
+  postgres-read:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: inventory_read_db
+    volumes:
+      - postgres_read_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints: [node.role == manager]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - target: 15672
+        published: 15672
+        mode: host
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints: [node.role == manager]
+
+  inventory-command-service:
+    image: localhost/inventory-command-service:latest
+    build: ./inventory-command-service
+    ports:
+      - target: 3001
+        published: 3001
+        mode: host
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres-write:5432/inventory_write_db?schema=public&connect_timeout=30
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_EXCHANGE: inventory.events
+      CORS_ORIGIN: http://localhost:5173
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  inventory-query-service:
+    image: localhost/inventory-query-service:latest
+    build: ./inventory-query-service
+    ports:
+      - target: 3002
+        published: 3002
+        mode: host
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres-read:5432/inventory_read_db?schema=public&connect_timeout=30
+      CORS_ORIGIN: http://localhost:5173
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  inventory-sync-service:
+    image: localhost/inventory-sync-service:latest
+    build: ./inventory-sync-service
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgresql://postgres:postgres@postgres-read:5432/inventory_read_db?schema=public&connect_timeout=30
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_EXCHANGE: inventory.events
+      RABBITMQ_QUEUE: inventory.sync.queue
+      SYNC_DELAY_MS: 700
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  frontend:
+    image: localhost/inventory-frontend:latest
+    build: ./frontend
+    ports:
+      - target: 5173
+        published: 5173
+        mode: host
+    environment:
+      VITE_COMMAND_API_URL: http://localhost:3001
+      VITE_QUERY_API_URL: http://localhost:3002
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - target: 9090
+        published: 9090
+        mode: host
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    volumes:
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - target: 3000
+        published: 3000
+        mode: host
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    configs:
+      - source: grafana_datasources
+        target: /etc/grafana/provisioning/datasources/datasource.yml
+      - source: grafana_dashboard_provider
+        target: /etc/grafana/provisioning/dashboards/dashboard.yml
+      - source: grafana_dashboard_json
+        target: /etc/grafana/provisioning/dashboards/inventory-dashboard.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+configs:
+  prometheus_config:
+    file: ./infra/prometheus/prometheus.yml
+  grafana_datasources:
+    file: ./infra/grafana/datasources/datasource.yml
+  grafana_dashboard_provider:
+    file: ./infra/grafana/dashboards/dashboard.yml
+  grafana_dashboard_json:
+    file: ./infra/grafana/dashboards/inventory-dashboard.json
+
+volumes:
+  postgres_write_data:
+    driver: local
+  postgres_read_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  default:
+    driver: overlay
+    attachable: true
