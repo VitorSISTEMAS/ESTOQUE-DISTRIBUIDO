@@ -6,11 +6,11 @@
 - **Backend**: Node.js 18+, Express 4, TypeScript 5 (ES Modules, `"type": "module"`)
 - **Runtime TS**: `tsx` (execução direta, sem build step)
 - **ORM**: Prisma 5
-- **Banco**: PostgreSQL 16 (dois bancos: `inventory_write_db` e `inventory_read_db`)
+- **Banco**: PostgreSQL 16 (dois bancos: `inventory_write_db` e `inventory_read_db` em instâncias separadas no Swarm)
 - **Mensageria**: RabbitMQ via `amqplib`
 - **Monitoria**: Prometheus + Grafana (via Docker)
 - **Frontend**: React 18, Vite 6, Axios
-- **Infra**: Docker Compose
+- **Infra**: Docker Compose + Docker Swarm (`docker-stack.yml`)
 
 ### Arquitetura
 ```
@@ -61,18 +61,37 @@ CORS_ORIGIN=http://localhost:5173
 ```
 
 ### Como Executar
-```bash
-# Tudo com Docker
-docker compose up --build
 
-# Individual (precisa de PostgreSQL e RabbitMQ rodando)
-# Command
+**Docker Compose (desenvolvimento local):**
+```bash
+docker compose up --build
+```
+
+**Docker Swarm (produção/distribuído):**
+```bash
+# Build + Deploy (com seed opcional)
+./deploy-swarm.sh
+./deploy-swarm.sh inventory --seed
+
+# Ou manualmente
+docker compose -f docker-stack.yml build
+docker stack deploy -c docker-stack.yml inventory
+
+# Escalar serviço
+docker service scale inventory_inventory-command-service=3
+
+# Logs
+docker service logs inventory_inventory-command-service -f
+
+# Remover
+docker stack rm inventory
+```
+
+**Individual (precisa de PostgreSQL e RabbitMQ rodando):**
+```bash
 cd inventory-command-service && npm start
-# Query
 cd inventory-query-service && npm start
-# Sync
 cd inventory-sync-service && npm start
-# Frontend
 cd frontend && npm run dev
 ```
 
